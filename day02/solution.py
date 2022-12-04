@@ -69,6 +69,6 @@ class Part01(Solution):
         return shape_score[options[1]] + outcome_score[options[0]][options[1]]
 
 if __name__ == "__main__":
-    solution = Part01()
+    solution = Part02()
     lines = solution.read_file("input.txt")
     print(solution.main(lines))
