@@ -92,23 +92,6 @@ def run():
         lines = solution.read_file("input.txt")
         print(solution.main(lines))
 
-def contained_by_test():
-    pairs = [
-        (Interval("8-18"),Interval("10-19")),
-        (Interval("10-19"),Interval("8-18")),
-        (Interval("5-5"),Interval("5-82")),
-        (Interval("5-82"),Interval("5-5"))
-    ]
-    for interval_a, interval_b in pairs:
-        print()
-        print(interval_a.contained_by(interval_b))
-
-def debug():
-    solution = Part02()
-    input_file = "sample.txt"
-    #import ipdb; ipdb.set_trace()
-    solution.main(solution.read_file(input_file))
-
 if __name__ == "__main__":
     #contained_by_test()
     run()
