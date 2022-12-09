@@ -23,8 +23,17 @@ class Part01(Solution):
                 return i+4
         return -1
 
+class Part02(Solution):
+    # brute force
+    def main(self, line: str) -> int:
+        for i in range(len(line)-13):
+            buffer = line[i:i+14]
+            if len(set(buffer)) == 14:
+                return i+14
+        return -1        
+
 def run():
-    problems = [Part01()]
+    problems = [Part01(), Part02()]
     for solution in problems:
         line = solution.read_file("input.txt")
         line = line[0].strip()
