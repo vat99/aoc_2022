@@ -3,6 +3,7 @@
 import abc
 from typing import List, TypeVar, Mapping, Dict
 from dataclasses import dataclass
+from collections import defaultdict
 
 """
 Part 1:
@@ -32,49 +33,50 @@ class Solution(abc.ABC):
     def parse(self, lines: List[str]):
         pass
 
+    @abc.abstractmethod
     def main(self, fname: str):
-        lines = self.read_file(fname)
-        print(self.parse(lines))
+        pass
+
     def read_file(self, fname: str) -> List[str]:
         with open(fname, 'r') as f:
             return f.readlines()
 
-TTreeNode = TypeVar("TTreeNode", bound="TreeNode")
-
-@dataclass
-class TreeNode:
-    value: str
-    size: int
-    parent: TTreeNode
-    children: Mapping[str, TTreeNode]
-
-    """
-    - Check if line is command ($)
-        - cd -> moving the root pointer
-            - cd x -> make a new TreeNode x; root = x
-            - cd .. -> 
-        - ls -> root.update_sums
-    -
-    """
-
 class Part01(Solution):
+    def main(self, fname: str):
+        lines = self.read_file(fname)
+        d = self.parse(lines)
+        results = [val for val in d.values() if val <= 100000]
+        return sum(results)
+    
     def parse(self, lines: List[str]) -> Dict[str, int]:
         """
         Use match case python
 
-        Assumes we only call ls once per each unique dir name (otherwise we will be double counting the values of some dirs - no checks in place for this, also can't have both `/a/b` and `/b/`)
+        Assumes we only call ls once per each unique dir name (otherwise we will be double counting the values of some dirs - no checks in place for this, also can't have both `/a/b` and `/b/`) -> BAD ASSUMPTION GUH
         """
-        dir_sums = dict()
+        dir_sums = defaultdict(int)
         pwd = [] # maintains stack of how we have traversed the tree (from / to cwd)
-        for line in lines:
+        for i,line in enumerate(lines):
+            #import ipdb; ipdb.set_trace() 
             match line.split():
                 case ["$", "cd", ".."]:
                     pwd.pop(0)
+                    if len(pwd) == 0:
+                        pwd = ["/"]
+                case ["$", "cd", "/"]:
+                    pwd = ["/"]
                 case ["$", "cd", dir_name]:
                     pwd.insert(0, dir_name)
-                case [f_size, _]:
-                    for dir in pwd:
-                        dir_sums[dir] = dir_sums.get(dir, 0) + f_size
-                case _: # case ["$", "ls"] | ["dir", dir_name]
-                    pass
+                case [f_size, _] if f_size.isdigit():
+                    for j, dir in enumerate(pwd):
+                        dir_name = "/".join(pwd[::-1][:len(pwd)-j])
+                        dir_sums[dir_name] += int(f_size)
+        print(dir_sums)
         return dir_sums
+
+def run(fname):
+    solution = Part01()
+    print(solution.main(fname))
+
+if __name__ == "__main__":
+    run("input.txt")
