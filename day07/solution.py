@@ -29,25 +29,6 @@ every diretory is ls'd once
 """
 
 class Solution(abc.ABC):
-    @abc.abstractmethod
-    def parse(self, lines: List[str]):
-        pass
-
-    @abc.abstractmethod
-    def main(self, fname: str):
-        pass
-
-    def read_file(self, fname: str) -> List[str]:
-        with open(fname, 'r') as f:
-            return f.readlines()
-
-class Part01(Solution):
-    def main(self, fname: str):
-        lines = self.read_file(fname)
-        d = self.parse(lines)
-        results = [val for val in d.values() if val <= 100000]
-        return sum(results)
-    
     def parse(self, lines: List[str]) -> Dict[str, int]:
         """
         Use match case python
@@ -74,8 +55,34 @@ class Part01(Solution):
         print(dir_sums)
         return dir_sums
 
+    @abc.abstractmethod
+    def main(self, fname: str) -> int:
+        pass
+
+    def read_file(self, fname: str) -> List[str]:
+        with open(fname, 'r') as f:
+            return f.readlines()
+
+class Part01(Solution):
+    def main(self, fname: str) -> int:
+        lines = self.read_file(fname)
+        d = self.parse(lines)
+        results = [val for val in d.values() if val <= 100000]
+        return sum(results)
+
+class Part02(Solution):
+    def main(self, fname: str) -> int:
+        lines = self.read_file(fname)
+        d = self.parse(lines)
+        total_space_remaining = 70000000-d["/"]
+        print(total_space_remaining)
+        for dir,val in d.items():
+            if dir != "/":
+                print(f"{dir}: {30000000-total_space_remaining+val}")
+        return min(val for val in d.values() if val+total_space_remaining-30000000 >= 0)
+
 def run(fname):
-    solution = Part01()
+    solution = Part02()
     print(solution.main(fname))
 
 if __name__ == "__main__":
