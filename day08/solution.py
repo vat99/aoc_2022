@@ -5,6 +5,19 @@ from typing import List, TypeVar, Mapping, Dict, Tuple
 from dataclasses import dataclass
 from collections import defaultdict
 
+import time
+
+def timer_func(func):
+    def function_timer(*args, **kwargs):
+        start = time.time()
+        value = func(*args, **kwargs)
+        end = time.time()
+        runtime = end - start
+        msg = "{func} took {time} seconds to complete its execution."
+        print(msg.format(func = func.__name__,time = runtime))
+        return value
+    return function_timer
+
 class Solution(abc.ABC):
     def __init__(self, fname):
         self.grid, self.num_rows, self.num_cols = self.parse(self.read_file(fname))
@@ -77,7 +90,8 @@ class Part01(Solution):
         #import ipdb; ipdb.set_trace()
         return self.check_up(i,j) or self.check_down(i,j) or self.check_left(i,j) or self.check_right(i,j)
 
-class Part02(Solution):
+class Part02(Solution):    
+    @timer_func
     def main(self) -> int:
         """
         hella bruteforce
@@ -118,11 +132,78 @@ class Part02(Solution):
                 return c-j
         return self.num_cols-1-j
     
-    def visible_score(self, i: int, j: int) -> bool:
+    def is_visible(self, i: int, j: int) -> bool:
         """
         bruteforce shieet
         """
-        return self.check_up(i,j) * self.check_down(i,j) * self.check_left(i,j) * self.check_right(i,j)
+        #print(f"value: {self.grid[i][j]}")
+        #print(self.num_rows, self.num_cols)
+        #import ipdb; ipdb.set_trace()
+        return self.check_up(i,j) or self.check_down(i,j) or self.check_left(i,j) or self.check_right(i,j)
+    
+    @timer_func
+    def main_optimized(self) -> int:
+        """
+        optimized
+        """
+        max_scenic_score = 0
+        next_greater_right_rows, next_greater_left_rows, next_greater_up_cols, next_greater_down_cols = self.get_visibility_scores()
+        for i in range(self.num_rows):
+            for j in range(self.num_cols):
+                left_visibility = next_greater_left_rows[i][j]
+                right_visibility = next_greater_right_rows[i][j]
+                up_visibility = next_greater_up_cols[j][i]
+                down_visibility = next_greater_down_cols[j][i]
+                score = left_visibility * right_visibility * up_visibility * down_visibility
+                if score > max_scenic_score:
+                    max_scenic_score = score
+        return max_scenic_score
+
+    def get_visibility_scores(self) -> Tuple[List[int], List[int], List[int], List[int]]:
+        next_greater_right_rows = []
+        next_greater_left_rows = []
+        next_greater_up_cols = []
+        next_greater_down_cols = []
+        
+        # rows
+        for i in range(self.num_rows):
+            right_result = self.next_greater_right(self.grid[i])
+            next_greater_right_rows.append(right_result)
+            left_result = self.next_greater_left(self.grid[i])
+            next_greater_left_rows.append(left_result)
+
+        # cols
+        for j in range(self.num_cols):
+            transposed_col = [self.grid[i][j] for i in range]
+            down_result = self.next_greater_right(transposed_col)
+            next_greater_up_cols.append(down_result)
+            up_result = self.next_greater_left(transposed_col)
+            next_greater_down_cols.append(up_result)
+
+        return next_greater_right_rows, next_greater_left_rows, next_greater_up_cols, next_greater_down_cols
+
+    def next_greater_right(self, arr):
+        res = [len(arr)-1-i for i in range(len(arr))] # start all indices at -1
+        stack = []
+        for i, num in enumerate(arr):
+            while len(stack) > 0 and arr[stack[-1]] < num:
+                index = stack.pop()
+                res[index] = i-index
+            stack.append(i)
+        return res
+
+    def next_greater_left(self, arr):
+        res = list(range(len(arr)))
+        stack = []
+        #for i, num in reversed(list(enumerate(arr))):
+        for i in range(len(arr)-1, -1, -1):
+            num = arr[i]
+            #print(f"num, stack, res: {num, stack, res}")
+            while len(stack) > 0 and arr[stack[-1]] < num:
+                index = stack.pop()
+                res[index] = index-i
+            stack.append(i)
+        return res
 
 def run(fname):
     solution = Part02(fname)
