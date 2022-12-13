@@ -2,7 +2,7 @@ def next_greater_right(arr):
     res = [len(arr)-1-i for i in range(len(arr))] # start all indices at -1
     stack = []
     for i, num in enumerate(arr):
-        while len(stack) > 0 and arr[stack[-1]] < num:
+        while len(stack) > 0 and arr[stack[-1]] <= num:
             index = stack.pop()
             res[index] = i-index
         stack.append(i)
@@ -15,7 +15,7 @@ def next_greater_left(arr):
     for i in range(len(arr)-1, -1, -1):
         num = arr[i]
         #print(f"num, stack, res: {num, stack, res}")
-        while len(stack) > 0 and arr[stack[-1]] < num:
+        while len(stack) > 0 and arr[stack[-1]] <= num:
             index = stack.pop()
             res[index] = index-i
         stack.append(i)
@@ -32,7 +32,7 @@ def get_left(arr):
     print(f"left: {res_left}")
 
 if __name__ == "__main__":
-    arr = [1, 2, 5, 13, 9, 6, 4, 12, 7]
+    arr = [3, 0, 3, 7, 3]
     get_right(arr)
     print()
     get_left(arr)

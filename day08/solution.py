@@ -99,7 +99,7 @@ class Part02(Solution):
         max_scenic_score = 0
         for i in range(1,self.num_rows-1):
             for j in range(1, self.num_cols-1):
-                current_scenic_score = self.visible_score(i,j)
+                current_scenic_score = self.is_visible(i,j)
                 if current_scenic_score > max_scenic_score:
                     max_scenic_score = current_scenic_score
         return max_scenic_score 
@@ -139,7 +139,7 @@ class Part02(Solution):
         #print(f"value: {self.grid[i][j]}")
         #print(self.num_rows, self.num_cols)
         #import ipdb; ipdb.set_trace()
-        return self.check_up(i,j) or self.check_down(i,j) or self.check_left(i,j) or self.check_right(i,j)
+        return self.check_up(i,j) * self.check_down(i,j) * self.check_left(i,j) * self.check_right(i,j)
     
     @timer_func
     def main_optimized(self) -> int:
@@ -148,12 +148,17 @@ class Part02(Solution):
         """
         max_scenic_score = 0
         next_greater_right_rows, next_greater_left_rows, next_greater_up_cols, next_greater_down_cols = self.get_visibility_scores()
+        #print(f"next_greater_right_rows: {next_greater_right_rows}")
+        #print(f"next_greater_left_rows: {next_greater_left_rows}")
+        #print(f"next_greater_up_cols: {next_greater_up_cols}")
+        #print(f"next_greater_down_cols: {next_greater_down_cols}")
         for i in range(self.num_rows):
             for j in range(self.num_cols):
                 left_visibility = next_greater_left_rows[i][j]
                 right_visibility = next_greater_right_rows[i][j]
                 up_visibility = next_greater_up_cols[j][i]
                 down_visibility = next_greater_down_cols[j][i]
+                #import ipdb; ipdb.set_trace()
                 score = left_visibility * right_visibility * up_visibility * down_visibility
                 if score > max_scenic_score:
                     max_scenic_score = score
@@ -174,7 +179,8 @@ class Part02(Solution):
 
         # cols
         for j in range(self.num_cols):
-            transposed_col = [self.grid[i][j] for i in range]
+            transposed_col = [self.grid[i][j] for i in range(self.num_rows)]
+            #print(transposed_col)
             down_result = self.next_greater_right(transposed_col)
             next_greater_up_cols.append(down_result)
             up_result = self.next_greater_left(transposed_col)
@@ -186,7 +192,7 @@ class Part02(Solution):
         res = [len(arr)-1-i for i in range(len(arr))] # start all indices at -1
         stack = []
         for i, num in enumerate(arr):
-            while len(stack) > 0 and arr[stack[-1]] < num:
+            while len(stack) > 0 and arr[stack[-1]] <= num:
                 index = stack.pop()
                 res[index] = i-index
             stack.append(i)
@@ -199,7 +205,7 @@ class Part02(Solution):
         for i in range(len(arr)-1, -1, -1):
             num = arr[i]
             #print(f"num, stack, res: {num, stack, res}")
-            while len(stack) > 0 and arr[stack[-1]] < num:
+            while len(stack) > 0 and arr[stack[-1]] <= num:
                 index = stack.pop()
                 res[index] = index-i
             stack.append(i)
@@ -211,6 +217,8 @@ def run(fname):
     #print(solution.is_visible(1,2)) # True
     #print(solution.is_visible(1,3)) # False
     print(solution.main())
+    solution = Part02(fname)
+    print(solution.main_optimized())
 
 if __name__ == "__main__":
     run("input.txt")
