@@ -37,8 +37,24 @@ class Part01(Solution):
 
         return head_position, tail_position
         
+    def transform_instruction(self, instruction: str) -> Tuple[str, int]:
+        instruction = instruction.split()
+        return (instruction[0], int(instruction[1]))
+
     def main(self, fname: str) -> int:
-        return 0
+        # init
+        head_position, tail_position = (0,0), (0,0)
+        visited_set = set()
+        visited_set.add(tail_position)
+        instructions = self.read_file(fname)
+        
+        # read instructions
+        for instruction in instructions:
+            direction, count = self.transform_instruction(instruction)
+            for _ in range(count):
+                head_position, tail_position = self.change_state(direction, head_position, tail_position)
+                visited_set.add(tail_position)
+        return len(visited_set)
     
     def check_position(self, head_position: Tuple[int, int], tail_position: Tuple[int, int]) -> bool:
         return abs(head_position[0]-tail_position[0]) <= 1 and abs(head_position[1]-tail_position[1]) <= 1
@@ -49,5 +65,9 @@ class Part01(Solution):
         """
         return (head_position == (tail_position[0]+1, tail_position[1]+1)) or (head_position == (tail_position[0]-1, tail_position[1]+1)) or (head_position == (tail_position[0]+1, tail_position[1]-1)) or (head_position == (tail_position[0]-1, tail_position[1]-1))
 
+def run(fname: str):
+    solution = Part01()
+    print(solution.main(fname))
+
 if __name__ == "__main__":
-    test()
+    run("sample.txt")
