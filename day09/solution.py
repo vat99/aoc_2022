@@ -1,6 +1,19 @@
 import abc
 from typing import List, Tuple
 
+import time
+
+def timer_func(func):
+    def function_timer(*args, **kwargs):
+        start = time.time()
+        value = func(*args, **kwargs)
+        end = time.time()
+        runtime = end - start
+        msg = "{func} took {time} seconds to complete its execution."
+        print(msg.format(func = func.__name__,time = runtime))
+        return value
+    return function_timer
+
 class Solution(abc.ABC):
     def read_file(self, fname: str) -> List[str]:
         with open(fname, 'r') as f:
@@ -65,9 +78,10 @@ class Part01(Solution):
         """
         return (head_position == (tail_position[0]+1, tail_position[1]+1)) or (head_position == (tail_position[0]-1, tail_position[1]+1)) or (head_position == (tail_position[0]+1, tail_position[1]-1)) or (head_position == (tail_position[0]-1, tail_position[1]-1))
 
+@timer_func
 def run(fname: str):
     solution = Part01()
     print(solution.main(fname))
 
 if __name__ == "__main__":
-    run("sample.txt")
+    run("input.txt")
