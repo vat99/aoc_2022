@@ -77,10 +77,60 @@ class Part01(Solution):
                 visited_set.add(tail_position)
         return len(visited_set)
 
+class Part02(Solution):
+    def main(self, fname: str) -> int:
+        # init
+        positions = [(0,0) for _ in range(10)]
+        visited_set = set()
+        visited_set.add(positions[-1])
+        instructions = self.read_file(fname)
+        
+        # read instructions
+        for instruction in instructions:
+            direction, count = self.transform_instruction(instruction)
+            for s in range(count):
+                positions = self.change_states(direction, positions)
+                visited_set.add(positions[-1])
+        return len(visited_set)
+
+    def change_states(self, direction: str, positions: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
+        new_positions = positions.copy()        
+        new_positions[0], new_positions[1] = self.change_state(direction, positions[0], positions[1])
+        i = 2
+        while i < len(positions):
+            new_positions[i] = self.change_trailing_states(direction, positions[i-1], new_positions[i-1], positions[i])
+            i += 1
+        print(new_positions)
+        return new_positions
+
+    def change_trailing_states(self, direction: str, old_head_position: Tuple[int, int], head_position: Tuple[int, int], tail_position: Tuple[int, int]) -> Tuple[int, int]:
+        if not self.check_position(head_position, tail_position):
+            if head_position[0] == tail_position[0] or head_position[1] == tail_position[1]:
+                match direction:
+                    case "R":
+                        tail_position = (tail_position[0]+1, tail_position[1])
+                    case "L":
+                        tail_position = (tail_position[0]-1, tail_position[1])
+                    case "U":
+                        tail_position = (tail_position[0], tail_position[1]+1)
+                    case "D":
+                        tail_position = (tail_position[0], tail_position[1]-1)
+            else:
+                match direction:
+                    case "R":
+                        tail_position = (old_head_position[0]+1, old_head_position[1])
+                    case "L":
+                        tail_position = (old_head_position[0]-1, old_head_position[1])
+                    case "U":
+                        tail_position = (old_head_position[0], old_head_position[1]+1)
+                    case "D":
+                        tail_position = (old_head_position[0], old_head_position[1]-1)
+        return tail_position
+
 @timer_func
 def run(fname: str):
-    solution = Part01()
+    solution = Part02()
     print(solution.main(fname))
 
 if __name__ == "__main__":
-    run("input.txt")
+    run("sample.txt")

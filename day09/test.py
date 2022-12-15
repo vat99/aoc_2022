@@ -1,12 +1,16 @@
 import pytest
-from solution import Part01
+from solution import Part01, Part02
 
 """
 Fixtures
 """
 @pytest.fixture()
 def part01():
-    return Part01()  
+    return Part01()
+
+@pytest.fixture()
+def part02():
+    return Part02()
 
 """
 E2E test
@@ -64,3 +68,25 @@ def test_part01_check_digonal(part01, head_position, tail_position, answer):
 )
 def test_part01_change_state(part01, direction, start_positions, answer):
     assert part01.change_state(direction, *start_positions) == answer
+
+@pytest.mark.parametrize(
+    "direction, start_positions, answer",
+    [
+        ("R", [(0,0) for _ in range(10)], [(1,0)] + [(0,0) for _ in range(9)]),
+        ("U", [(4,1), (3,0), (2,0), (1,0)] + [(0,0) for _ in range(6)], [(4,2), (4,1), (3,1), (2,1), (1,1)] + [(0,0) for _ in range(5)])
+    ]
+)
+def test_part02_change_states(part02, direction, start_positions, answer):
+    assert part02.change_states(direction, start_positions) == answer
+
+@pytest.mark.parametrize(
+    "direction, steps, start_positions, answer",
+    [
+        ("R", 5, [(0,0) for _ in range(10)], [(x,0) for x in range(5,0,-1)]+[(0,0) for _ in range(5)]),
+        ("U", 8, [(x,0) for x in range(5,0,-1)]+[(0,0) for _ in range(5)], [(5,8), (5,7), (5,6), (5,5), (5,4), (4,4), (3,3), (2,2), (1,1), (0,0)]),
+    ]
+)
+def test_part02_change_states_with_steps(part02, direction, steps, start_positions, answer):
+    for _ in range(steps):
+        start_positions = part02.change_states(direction, start_positions)
+    assert start_positions == answer
